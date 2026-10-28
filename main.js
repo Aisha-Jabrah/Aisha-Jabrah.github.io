@@ -39,7 +39,7 @@
   document.querySelectorAll("[data-role]").forEach(function (n) { n.textContent = S.role; });
   document.querySelectorAll("[data-subrole]").forEach(function (n) { n.textContent = S.subRole || ""; });
   if ($("tagline")) $("tagline").textContent = "« " + S.tagline + " »";
-  if ($("tagline-author")) $("tagline-author").textContent = "— " + S.taglineAuthor;
+  if ($("tagline-author")) { $("tagline-author").textContent = S.taglineAuthor ? "— " + S.taglineAuthor : ""; $("tagline-author").hidden = !S.taglineAuthor; }
   if ($("year")) $("year").textContent = new Date().getFullYear();
 
   if ($("about-text")) {
@@ -48,7 +48,7 @@
 
   /* ---------- vertical timeline ---------- */
   if ($("vline")) {
-    var colors = ["#e0916e", "#6f93cf", "#b0609f", "#d3234a"];
+    var colors = ["#9A806D", "#713B46", "#C9B8A5", "#352A26"];
     var tints = ["", "tint-b", "tint-m", "tint-c"];
     S.journey.forEach(function (j, i) {
       var seg = el("div", "seg reveal " + tints[i % 4]);
@@ -139,12 +139,12 @@
   /* ---------- folders ---------- */
   if ($("folders")) {
     var FC = [
-      { bg: "#3b6aab", fg: "#0c1a35", bar: "rgba(12,26,53,.22)" },
-      { bg: "#a85a9f", fg: "#0c1a35", bar: "rgba(12,26,53,.22)" },
-      { bg: "#e0916e", fg: "#0c1a35", bar: "rgba(12,26,53,.18)" },
-      { bg: "#d3234a", fg: "#0c1a35", bar: "rgba(12,26,53,.25)" },
-      { bg: "#8fa6d6", fg: "#0c1a35", bar: "rgba(12,26,53,.18)" },
-      { bg: "#274c86", fg: "#e6dcec", bar: "rgba(230,220,236,.2)" }
+      { bg: "#EFE6D9", fg: "#352A26", bar: "rgba(53,42,38,.08)" },
+      { bg: "#E4D2C5", fg: "#352A26", bar: "rgba(53,42,38,.08)" },
+      { bg: "#713B46", fg: "#FCFAF6", bar: "rgba(252,250,246,.12)" },
+      { bg: "#D9C7B7", fg: "#352A26", bar: "rgba(53,42,38,.08)" },
+      { bg: "#C9B8A5", fg: "#352A26", bar: "rgba(53,42,38,.08)" },
+      { bg: "#9A806D", fg: "#FCFAF6", bar: "rgba(252,250,246,.12)" }
     ];
     var shown = 0;
     S.folders.forEach(function (f) {
