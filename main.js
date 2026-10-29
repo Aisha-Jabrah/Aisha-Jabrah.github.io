@@ -39,7 +39,8 @@
   document.querySelectorAll("[data-role]").forEach(function (n) { n.textContent = S.role; });
   document.querySelectorAll("[data-subrole]").forEach(function (n) { n.textContent = S.subRole || ""; });
   if ($("tagline")) $("tagline").textContent = "« " + S.tagline + " »";
-  if ($("tagline-author")) { $("tagline-author").textContent = S.taglineAuthor ? "— " + S.taglineAuthor : ""; $("tagline-author").hidden = !S.taglineAuthor; }
+  if ($("tagline-author")) $("tagline-author").textContent = S.taglineAuthor ? "— " + S.taglineAuthor : "";
+  if ($("cv-btn") && S.contact && S.contact.cv) $("cv-btn").href = S.contact.cv;
   if ($("year")) $("year").textContent = new Date().getFullYear();
 
   if ($("about-text")) {
@@ -48,7 +49,7 @@
 
   /* ---------- vertical timeline ---------- */
   if ($("vline")) {
-    var colors = ["#9A806D", "#713B46", "#C9B8A5", "#352A26"];
+    var colors = ["#e0916e", "#6f93cf", "#b0609f", "#d3234a"];
     var tints = ["", "tint-b", "tint-m", "tint-c"];
     S.journey.forEach(function (j, i) {
       var seg = el("div", "seg reveal " + tints[i % 4]);
@@ -57,7 +58,7 @@
       var en = el("div", "entry reveal" + (i === S.journey.length - 1 ? " now" : ""));
       en.appendChild(el("div", "period", j.period));
       en.appendChild(el("h3", "", j.org));
-      en.appendChild(el("div", "erole", j.role));
+      if (j.role) en.appendChild(el("div", "erole", j.role));
       en.appendChild(el("h4", "", j.headline));
       en.appendChild(el("p", "", j.text));
       $("vline").appendChild(seg);
@@ -119,8 +120,8 @@
       f.setAttribute("allow", "accelerometer; encrypted-media; picture-in-picture");
       c.appendChild(f);
     } else {
-      var box = el("div", "card-img" + (it.tall ? " tall" : "") + (it.image ? "" : " ph"));
-      if (it.image) { var g = document.createElement("img"); g.src = it.image; g.alt = it.imageAlt || it.title; g.loading = "lazy"; box.appendChild(g); }
+      var box = el("div", "card-img" + (it.tall ? " tall" : "") + (it.logo ? " logo" : "") + (it.image ? "" : " ph"));
+      if (it.image) { var g = document.createElement("img"); g.src = it.image; g.alt = it.imageAlt || it.title; g.loading = "lazy"; box.appendChild(g); if (it.zoom) { box.classList.add("zoomable"); box.tabIndex = 0; box.setAttribute("role", "button"); box.setAttribute("aria-label", "عرض الصورة: " + (it.title || "العمل")); box.addEventListener("click", function(){ var big = document.createElement("img"); big.src = it.image; big.alt = it.imageAlt || it.title; big.className = "zoom-image"; openModal(it.title || "عرض الصورة", [big]); }); } }
       else box.innerHTML = ICONS[it.icon || "doc"];
       c.appendChild(box);
     }
@@ -139,12 +140,12 @@
   /* ---------- folders ---------- */
   if ($("folders")) {
     var FC = [
-      { bg: "#EFE6D9", fg: "#352A26", bar: "rgba(53,42,38,.08)" },
-      { bg: "#E4D2C5", fg: "#352A26", bar: "rgba(53,42,38,.08)" },
-      { bg: "#713B46", fg: "#FCFAF6", bar: "rgba(252,250,246,.12)" },
-      { bg: "#D9C7B7", fg: "#352A26", bar: "rgba(53,42,38,.08)" },
-      { bg: "#C9B8A5", fg: "#352A26", bar: "rgba(53,42,38,.08)" },
-      { bg: "#9A806D", fg: "#FCFAF6", bar: "rgba(252,250,246,.12)" }
+      { bg: "#3b6aab", fg: "#0c1a35", bar: "rgba(12,26,53,.22)" },
+      { bg: "#a85a9f", fg: "#0c1a35", bar: "rgba(12,26,53,.22)" },
+      { bg: "#e0916e", fg: "#0c1a35", bar: "rgba(12,26,53,.18)" },
+      { bg: "#d3234a", fg: "#0c1a35", bar: "rgba(12,26,53,.25)" },
+      { bg: "#8fa6d6", fg: "#0c1a35", bar: "rgba(12,26,53,.18)" },
+      { bg: "#274c86", fg: "#e6dcec", bar: "rgba(230,220,236,.2)" }
     ];
     var shown = 0;
     S.folders.forEach(function (f) {
@@ -166,32 +167,14 @@
     });
   }
 
-  /* ---------- locked works ---------- */
-  if ($("locked-wrap") && S.locked && S.locked.items && S.locked.items.length) {
-    var L = S.locked, box2 = el("div", "locked reveal");
-    var lb = el("button", "lockbtn"); lb.type = "button"; lb.setAttribute("aria-label", "عرض الأعمال المحظورة");
-    lb.innerHTML = ICONS.lock;
-    box2.appendChild(lb);
-    box2.appendChild(el("h3", "", L.title));
-    box2.appendChild(el("p", "", L.hint));
-    function openLocked() {
-      var nodes = L.items.map(function (it) {
-        var c = el("article", "card wide");
-        var bd = el("div", "card-body");
-        bd.appendChild(el("h4", "", it.title));
-        if (it.illustration) {
-          var t = el("div", "term");
-          t.innerHTML = "<b>AMADEUS</b><span class='rd l'></span><span class='rd m'></span><span class='rd s'></span><span class='rd l'></span><em>رسم توضيحي بدون أي بيانات حقيقية، لسرّية بيانات الركاب والنظام.</em>";
-          bd.appendChild(t);
-        }
-        bd.appendChild(el("p", "", it.desc));
-        c.appendChild(bd);
-        return c;
-      });
-      openModal(L.title, nodes);
-    }
-    lb.addEventListener("click", openLocked);
-    $("locked-wrap").appendChild(box2);
+  /* ---------- standalone works (Saudia) ---------- */
+  if ($("standalone") && S.standalone && S.standalone.items && S.standalone.items.length) {
+    var SD = S.standalone, sbox = $("standalone");
+    sbox.appendChild(el("h3", "std-title", SD.title));
+    if (SD.intro) sbox.appendChild(el("p", "std-intro", SD.intro));
+    var sg = el("div", "std-grid reveal");
+    SD.items.forEach(function (it) { sg.appendChild(buildCard(it)); });
+    sbox.appendChild(sg);
   }
 
   /* ---------- skills ---------- */
@@ -213,7 +196,9 @@
     }
     if (S.languages && S.languages.length) {
       var lg = el("div", "skill-box reveal"); lg.appendChild(el("h3", "", "اللغات"));
-      var ll = el("ul", "chips"); S.languages.forEach(function (t) { ll.appendChild(el("li", "", t)); });
+      var ll = el("ul", "chips"); S.languages.forEach(function (t) { var li = el("li", t.level ? "language-level" : "", t.name);
+      if (t.level) { var badge = el("span", "level-orbit", "C1"); li.appendChild(badge); }
+      ll.appendChild(li); });
       lg.appendChild(ll); $("skills-extra").appendChild(lg);
     }
   }
@@ -232,12 +217,15 @@
       });
       $("blog-area").appendChild(list);
     }
-    if (S.blogLink && S.blogLink.url) {
+    var bg = el("div", "blog-grid");
+    (S.blogs || []).forEach(function (b) {
       var card = el("div", "blog-card reveal");
-      card.appendChild(el("p", "", "نصوصي المنشورة تجدها في مدوّنتي على مسودة."));
-      card.appendChild(link(S.blogLink.label, S.blogLink.url, "btn-main"));
-      $("blog-area").appendChild(card);
-    }
+      card.appendChild(el("h3", "", b.title));
+      card.appendChild(el("p", "", b.desc));
+      card.appendChild(link(b.label, b.url, "btn-main"));
+      bg.appendChild(card);
+    });
+    $("blog-area").appendChild(bg);
   }
 
   /* ---------- contact ---------- */
@@ -246,14 +234,15 @@
     function row(ic, text, href, ltr) {
       var a = el(href ? "a" : "div", href ? "" : "plain");
       if (href) { a.href = href; if (href.indexOf("http") === 0) { a.target = "_blank"; a.rel = "noopener noreferrer"; } }
-      a.appendChild(el("span", "ic", ic));
+      var icn = el("span", "ic"); if (ic.charAt(0) === "<") icn.innerHTML = ic; else icn.textContent = ic;
+      a.appendChild(icn);
       var t = ltr ? document.createElement("bdi") : document.createElement("span");
       t.textContent = text; a.appendChild(t); cl2.appendChild(a);
     }
     if (c.email) row("@", c.email, "mailto:" + c.email, true);
     if (c.phone) row("☎", c.phone, "tel:" + c.phone, true);
     if (c.linkedin) row("in", "LinkedIn — عائشة جابرة", c.linkedin);
-    if (c.cv) row("CV", "السيرة الذاتية", c.cv);
+    if (c.telegram) row('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.5 3.3 2.9 10.5c-1.2.5-1.2 1.2-.2 1.5l4.700 1.500 1.800 5.600c.2.600.1.800.7.800.5 0 .7-.2 1-.5l2.300-2.200 4.700 3.500c.9.500 1.500.2 1.700-.8l3.100-14.700c.3-1.300-.5-1.900-1.500-1.500ZM8.700 13.200l9.500-6c.4-.3.800-.1.500.2l-7.800 7.100-.3 3.200Z"/></svg>', c.telegram.label || "نصوص قصيرة", c.telegram.url);
     if (c.location) row("⌖", c.location, "");
   }
 
@@ -285,10 +274,13 @@
     if ("IntersectionObserver" in window) {
       var so = new IntersectionObserver(function (es) {
         es.forEach(function (e) {
-          if (e.isIntersecting) links.forEach(function (a) { a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id); });
+          if (e.isIntersecting) {
+            var tabMap = { home: "home", about: "home", journey: "journey", projects: "projects", skills: "projects", blog: "contact", contact: "contact" };
+            links.forEach(function (a) { a.classList.toggle("on", a.getAttribute("href") === "#" + tabMap[e.target.id]); });
+          }
         });
       }, { rootMargin: "-45% 0px -50% 0px" });
-      ["home", "journey", "projects", "skills", "blog", "contact"].forEach(function (id2) { var s = $(id2); if (s) so.observe(s); });
+      ["home", "about", "journey", "projects", "skills", "blog", "contact"].forEach(function (id2) { var s = $(id2); if (s) so.observe(s); });
     }
   }
 
